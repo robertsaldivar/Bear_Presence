@@ -1,0 +1,68 @@
+---
+title: "Bear_Presence"
+author: "Robert Saldivar"
+date: "12/2/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The Purpose of this analysis is to see if there is a statistical difference between observed bear presence points and random points within the Northern Appalachian and Acadian Region, between the Catskills mountains and the Adirondacks mountains.
+
+```{r, include=FALSE}
+library("tidyverse") #Loading tidyverse into the system
+
+bears <- read_csv("Bear_RasterV.csv") #Loading the Bear Presence data
+random <- read_csv("Random_RasterV.csv") #Loading the random presence data into the system
+```
+
+```{r}
+bear_select <- bears %>%
+  select(OBJECTID,RASTERVALU) #Filtering the bear data so that only the ObjectID and the Raster Value are in the table
+
+```
+
+```{r}
+#Checking the normalitiy of the data
+bears_hist <- ggplot(bear_select, aes(x=RASTERVALU))+
+  geom_histogram()
+random_hist <- ggplot(random, aes(x=RASTERVALU))+
+  geom_histogram()
+
+bears_hist
+random_hist
+```
+
+
+
+
+```{r}
+#Calculating some summary statitics of the data
+
+bear_summary <- bear_select %>%
+  mutate(RASTERVALU = as.numeric((RASTERVALU))) %>%
+  summarise(
+  mean_rasterV = mean(RASTERVALU),
+  sd_rasterV = sd(RASTERVALU),
+  sample_size = length(RASTERVALU))
+
+random_summary <- random %>%
+  mutate(RASTERVALU = as.numeric(RASTERVALU)) %>%
+  summarise(
+  mean_rasterV = mean(RASTERVALU),
+  sd_rasterV = sd(RASTERVALU),
+  sameple_size = length(RASTERVALU))
+```
+
+```{r}
+Bear_Random_ttest <- t.test(bear_select$RASTERVALU, random$RASTERVALU) #Creating a two sample t-test of the raster values between random points and the observed bear points
+
+Bear_Random_ttest
+#The raster values between the random points and the the observed bear points do not differ significantly (t(53.9) =  0.989, p= 0.33)
+
+
+
+```
+
